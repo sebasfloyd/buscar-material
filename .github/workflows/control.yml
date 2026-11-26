@@ -1,0 +1,7 @@
+name: control
+on: workflow_dispatch
+jobs:
+  eco:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo funciona
