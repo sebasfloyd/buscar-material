@@ -11,6 +11,7 @@ Un buscador de fotos y videos que corre en tu compu. Escribís lo que buscás ("
 - **Buscar no gasta tokens.** La Mente solo instala y abre; después buscás vos en una ventana del navegador.
 - **Los originales no se tocan.** El buscador solo lee. No mueve, no renombra, no borra y no escribe nada dentro de tus carpetas de material.
 - Sirve también para marcar qué fotos ya se usaron, ponerles etiquetas y encontrar repetidas.
+- **En equipo.** Las etiquetas, las marcas de "ya usada" (con quién y cuándo) y una lista acordada de etiquetas se pueden compartir entre las compus del equipo, sin servidor ni cuentas nuevas.
 
 ## Qué pide
 
@@ -43,6 +44,18 @@ La guía completa, con capturas, está en `guia.pdf`.
 | <picture>  <source media="(prefers-color-scheme: dark)" srcset="docs/inicio-oscuro.jpg">  <img src="docs/inicio-claro.jpg" alt="Pantalla inicial con la barra de búsqueda e ideas sacadas del propio material"></picture> | <picture>  <source media="(prefers-color-scheme: dark)" srcset="docs/vista-oscuro.jpg">  <img src="docs/vista-claro.jpg" alt="Vista en grande de una foto, con su carpeta, etiquetas y acciones"></picture> |
 
 <sub>Las fotos de las capturas son de dominio público, de Wikimedia Commons.</sub>
+
+## Compartir las etiquetas con el equipo
+
+Si varias personas trabajan con el mismo material, cada una en su compu, lo que una etiqueta o marca como usado le puede llegar a las demás. Así nadie repite una foto y todas usan las mismas etiquetas.
+
+No hace falta ningún servidor: el buscador guarda esos datos en una carpeta dentro de la Mente compartida del equipo, y viajan cuando la Mente se comparte y se actualiza (no es al instante). Para activarlo, cada persona pega esto en el chat de su Mente:
+
+> Compartí las etiquetas del buscador de material con el equipo.
+
+Cómo funciona por dentro: cada compu escribe un archivo propio, con una línea por cambio (`eventos/<compu>.jsonl`). Como nadie escribe el archivo de otra, dos personas pueden etiquetar a la vez sin que se pisen ni aparezcan conflictos. Si las dos etiquetan la misma foto, quedan las etiquetas de las dos. Las fotos se reconocen por su contenido, no por su ruta, así que no importa dónde tenga cada una el material.
+
+La **lista acordada** es el vocabulario del equipo: al etiquetar se sugieren primero esas, y las que no están en la lista se ven como "sueltas". No prohíbe etiquetas nuevas.
 
 ## Cómo se actualiza
 

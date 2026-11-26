@@ -1,5 +1,13 @@
 # Cambios
 
+## 3.1.0 · noviembre 2026
+- Etiquetas compartidas entre las compus del equipo: lo que una persona etiqueta, marca como "ya usada" o asigna a un cliente les llega a las demás por una carpeta de la Mente compartida. Sin servidor ni cuentas nuevas.
+- Dos personas pueden etiquetar a la vez sin conflictos de git: cada compu escribe su propio archivo.
+- La marca de "ya usada" muestra quién la puso y cuándo.
+- Lista acordada de etiquetas del equipo: se sugieren primero al etiquetar y se distinguen de las sueltas. No prohíbe etiquetas nuevas.
+- Comandos nuevos: `etiquetas compartir`, `etiquetas estado`, `etiquetas autor` y `etiquetas lista`. `etiquetas ubicacion` sigue funcionando.
+- Las etiquetas que ya había se pasan solas al formato nuevo, sin perder nada.
+
 ## 3.0.1 · noviembre 2026
 - Windows: la preparación de la primera vez ya no falla al cargar el modelo recién descargado.
 - El buscador pasa a ser libre, con licencia MIT.

@@ -66,18 +66,22 @@ Si responde que se instaló desde un zip, hace falta el zip de la versión nueva
 
 En los dos casos el índice y las etiquetas no se pierden: viven en `~/.mente-ai/buscar-material/`, fuera de la skill. `buscar version` dice cuál quedó instalada.
 
-## 7. Etiquetas compartidas por el equipo (solo si la Mente se comparte por git)
+## 7. Etiquetas compartidas por el equipo (solo si la Mente se comparte)
 
-Primero fijate si corresponde: `git -C . rev-parse --is-inside-work-tree` dice si la carpeta de la Mente es un repositorio; si lo es, preguntale a la persona si lo comparte con su equipo. Si no, salteá este paso.
+Primero fijate si corresponde: `git -C . rev-parse --is-inside-work-tree` dice si la carpeta de la Mente es un repositorio; si lo es, preguntale a la persona si lo comparte con su equipo y si las demás también usan el buscador. Si no, salteá este paso.
 
-Por defecto las etiquetas quedan en cada compu. Para que sean de todos, **una sola persona** lo configura una vez:
+Por defecto las etiquetas, las marcas de "ya usada" y los clientes quedan en cada compu. Para que sean de todas, **en cada compu** se corre una vez, con la misma carpeta dentro de la Mente:
 
 ```
-buscar etiquetas ubicacion "<carpeta de la Mente>/material/etiquetas"
+buscar etiquetas compartir "<carpeta de la Mente>/material/etiquetas" --autor "<nombre de la persona>"
 ```
 
-Después subí esa carpeta al repositorio de la Mente con el commit de siempre. Ahí quedan tres archivos chicos: `etiquetas.jsonl`, `clientes.jsonl` y `.gitattributes` (este último hace que git junte los cambios de dos personas sin marcar conflicto).
+Preguntale con qué nombre quiere figurar (es lo que ven las demás en "usada por"). Si la Mente ya tiene una carpeta de etiquetas compartida de antes, usá esa misma.
 
-**El resto del equipo**, en su compu, después de bajar los cambios de la Mente, corre el mismo comando con la misma carpeta. No pierde lo que ya había etiquetado: se une con lo compartido. Desde ahí cada cambio de etiquetas viaja con el commit y el pull normales de la Mente, y el buscador los toma solo.
+Después compartí la Mente (el botón "Compartir", o el commit y push de siempre) para que la carpeta le llegue al resto. Adentro queda una subcarpeta `eventos` con un archivo por compu. Como cada compu escribe solo el suyo, git no marca conflictos aunque dos personas etiqueten a la vez.
 
-Cada foto se reconoce por su contenido y cada biblioteca por sus subcarpetas, así que no importa que en cada compu el disco tenga otra letra, otra ruta u otro nombre.
+No pierde lo que cada una ya había etiquetado: se suma a lo compartido. Desde ahí los cambios viajan cada vez que la Mente se comparte y se actualiza, y el buscador los toma solo. `buscar etiquetas estado` muestra quiénes escribieron y cuándo llegó lo último.
+
+Cada foto se reconoce por su contenido y cada biblioteca por sus subcarpetas, así que no importa que en cada compu el material esté en otra ruta, otro disco u otro nombre.
+
+Para terminar, ofrecé armar la lista de etiquetas del equipo: `buscar etiquetas lista agregar "aprobada,carta verano"`. Los detalles están en el punto 6 de `SKILL.md`.

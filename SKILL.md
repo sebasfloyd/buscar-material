@@ -1,6 +1,6 @@
 ---
 name: buscar-material
-description: Buscador local de fotos y videos de los clientes. Un modelo de visión que corre en la compu indexa las carpetas una vez; después se busca escribiendo ("niguiris de salmón sobre fondo negro") en una ventana del navegador, al instante y sin gastar tokens. También guarda etiquetas, cliente por carpeta y qué material ya se usó. Usar cuando digan "buscá en el material", "dónde está la foto de", "abrí el buscador", "indexá esta carpeta", "qué fotos tenemos de", "armame posteos con lo que ya tenemos", "marcá estas como usadas", "qué queda sin usar de", "hay fotos repetidas".
+description: Buscador local de fotos y videos de los clientes. Un modelo de visión que corre en la compu indexa las carpetas una vez; después se busca escribiendo ("niguiris de salmón sobre fondo negro") en una ventana del navegador, al instante y sin gastar tokens. También guarda etiquetas, cliente por carpeta y qué material ya se usó (y quién lo usó), y los comparte entre las compus del equipo. Usar cuando digan "buscá en el material", "dónde está la foto de", "abrí el buscador", "indexá esta carpeta", "qué fotos tenemos de", "armame posteos con lo que ya tenemos", "marcá estas como usadas", "qué queda sin usar de", "hay fotos repetidas", "compartí las etiquetas con el equipo", "armemos la lista de etiquetas", "quién usó esta foto".
 argument-hint: "[qué buscar o qué carpeta sumar]"
 allowed-tools: Bash, Read
 ---
@@ -9,7 +9,7 @@ allowed-tools: Bash, Read
 
 Vos solo preparás, indexás y abrís. Buscar lo hace la persona en la ventana: eso no pasa por vos ni gasta tokens.
 
-**Los originales no se tocan.** El buscador solo los lee. Nunca muevas, renombres ni borres archivos de una biblioteca, ni siquiera si te lo sugiere la vista de duplicados: eso lo decide y lo hace la persona. Tampoco se escriben metadatos en los archivos ni archivos al lado. Todo lo que se escribe está en `~/.mente-ai/buscar-material/` (herramientas, modelo, índice, miniaturas), en la carpeta de etiquetas si se eligió otra, y en la carpeta que la persona elija al exportar copias.
+**Los originales no se tocan.** El buscador solo los lee. Nunca muevas, renombres ni borres archivos de una biblioteca, ni siquiera si te lo sugiere la vista de duplicados: eso lo decide y lo hace la persona. Tampoco se escriben metadatos en los archivos ni archivos al lado. Todo lo que se escribe está en `~/.mente-ai/buscar-material/` (herramientas, modelo, índice, miniaturas), en la carpeta de etiquetas compartida si el equipo eligió una, y en la carpeta que la persona elija al exportar copias.
 
 ## 1. Cómo correr los comandos
 
@@ -69,6 +69,7 @@ Contale a la persona lo básico, corto:
 - Escribe lo que busca en español. Arriba aparece lo que coincide; debajo, separado, lo "relacionado". También puede arrastrar o pegar una imagen para encontrar parecidas.
 - Flechas para moverse, barra espaciadora para la vista rápida, Enter para abrir, Cmd/Ctrl+K o `/` para volver a buscar.
 - Cmd/Ctrl+clic y Shift+clic para elegir varias. Con una o varias elegidas: `T` para etiquetar, `U` para marcar como usada, "Exportar copias" o "Copiar rutas".
+- Si las etiquetas están compartidas, abajo a la derecha dice "Etiquetas compartidas" y cuándo llegó lo último; ahí mismo se ve la lista del equipo y quiénes escribieron.
 - Filtros bajo la barra: cliente, etiqueta, "Sin usar" (un clic; otro clic muestra las ya usadas), orientación, fecha.
 - Si un disco no está conectado, sus fotos igual aparecen con la miniatura guardada.
 
@@ -82,17 +83,48 @@ buscar marcar-usada "<ruta>" "<ruta>" --nota "Instagram 12/11" [--fecha AAAA-MM-
 buscar etiquetas listar
 ```
 
-Las dos aceptan `--lista archivo.txt` con una ruta por línea. **Cuando entregues piezas armadas con material del buscador, marcá esas fotos como usadas con una nota que diga dónde salieron.**
+Las dos primeras aceptan `--lista archivo.txt` con una ruta por línea. **Cuando entregues piezas armadas con material del buscador, marcá esas fotos como usadas con una nota que diga dónde salieron.** La marca guarda quién la puso y cuándo; `buscar buscar` la devuelve en `usada` y `usadaPor`.
 
-Se guardan en dos archivos de texto chicos (`etiquetas.jsonl` y `clientes.jsonl`), no en los originales. Cada foto se reconoce por su contenido, no por su ruta: si el disco cambia de letra o la carpeta se muda, las etiquetas siguen pegadas. Cada biblioteca se reconoce por sus subcarpetas, no por su nombre ni su ruta: en otra compu puede llamarse distinto y las reglas de cliente igual le llegan.
+Nada de esto se escribe en los originales. Cada foto se reconoce por su contenido, no por su ruta: si el disco cambia de letra o la carpeta se muda, las etiquetas siguen pegadas.
 
-Para que sean de todo el equipo, apuntalas a una carpeta de la Mente compartida (repo git):
+### Compartirlas con el equipo
+
+Por defecto las etiquetas, las marcas de usada y los clientes quedan en cada compu. Si varias personas usan el buscador sobre el mismo material (cada una con su copia, en la ruta que sea) conviene compartirlos: así nadie repite una foto que otra ya publicó y todas etiquetan con las mismas palabras.
+
+**Cuándo proponerlo:** si la carpeta de la Mente es un repositorio git que el equipo comparte, o si la persona dice "compartí las etiquetas", "que mis compañeras vean lo que marqué" o "no quiero repetir fotos que ya usó otra". Preguntá antes de configurarlo.
+
+**Cómo:** se hace una vez en cada compu, con la misma carpeta dentro de la Mente compartida.
 
 ```bash
-buscar etiquetas ubicacion "<raíz de la Mente>/material/etiquetas"
+buscar etiquetas compartir "<raíz de la Mente>/material/etiquetas" --autor "<nombre de la persona>"
 ```
 
-Lo que ya había en los dos lugares se une. El buscador deja ahí un `.gitattributes` para que git junte los cambios de dos personas sin marcar conflicto; si las dos etiquetaron la misma foto, quedan las etiquetas de las dos. Los cambios viajan con el commit y el pull de siempre, y el buscador los toma solo, sin reiniciar.
+- La carpeta tiene que estar dentro de lo que el equipo sincroniza y tiene que ser la misma (la misma ruta dentro de la Mente) para todas. Si la Mente ya tiene un lugar para datos compartidos, usá ese, en una subcarpeta `buscar-material`. Si ya hay una carpeta compartida de una versión anterior, usá esa misma.
+- `--autor` es el nombre con que figura lo que etiqueta o marca esa persona. Preguntáselo. Si no se indica, se usa el usuario del sistema. Se cambia después con `buscar etiquetas autor "<Nombre>"` y vale desde ese momento.
+- Lo que esa compu ya tenía etiquetado se suma a lo compartido, sin pisar lo de nadie.
+- El buscador no hace git. Solo lee y escribe archivos en esa carpeta: los cambios salen cuando la persona comparte la Mente (el botón "Compartir" o el commit y push de siempre) y entran cuando la Mente baja lo nuevo. No es al instante. El buscador abierto toma lo que llega solo, sin reiniciar ni reindexar.
+- Después de configurarlo, compartí la Mente una vez para que la carpeta llegue al resto.
+
+```bash
+buscar etiquetas estado              # si está compartido, dónde, quiénes escribieron, cuándo llegó lo último
+buscar etiquetas compartir --dejar   # volver a tenerlas solo en esta compu (se queda con todo lo que había)
+```
+
+Si `estado` devuelve `noEncuentroLaCarpeta`, la carpeta se movió o la Mente no está: volvé a indicarla con `etiquetas compartir`. Mientras tanto no se puede etiquetar, para no escribir en un lugar equivocado.
+
+**Cómo está guardado** (para diagnosticar, no para editar a mano): dentro de la carpeta hay `eventos/<compu>.jsonl`, un archivo por compu con una línea por cambio (quién, cuándo, a qué foto). Cada compu escribe solo el suyo, por eso git nunca marca conflicto aunque dos personas editen a la vez. El estado se arma con los archivos de todas: si dos etiquetan la misma foto quedan las etiquetas de las dos, quitar una etiqueta le gana a haberla agregado antes, y en la marca de usada vale la última. No borres ni edites esos archivos: son el historial. Las etiquetas de fotos que una compu todavía no indexó quedan guardadas y aparecen cuando las indexe. Todas las compus tienen que tener la versión 3.1.0 o más nueva.
+
+### Lista acordada de etiquetas
+
+Es el vocabulario del equipo: las etiquetas que conviene usar. No prohíbe las demás. En la ventana se sugieren primero, y las que no están en la lista se ven como "sueltas".
+
+```bash
+buscar etiquetas lista ver                         # la lista y, aparte, las sueltas que ya se usan
+buscar etiquetas lista agregar "aprobada,carta verano"
+buscar etiquetas lista quitar "borrador"           # sale de la lista; las fotos que la tienen la conservan
+```
+
+Si está compartido, la lista también viaja. Cuando el equipo arranque, proponé armarla con ellas: mirá las sueltas de `lista ver`, sugerí unificar las que digan lo mismo y agregá las acordadas. En la ventana se maneja desde "Lista del equipo", en el panel de etiquetas (`T`).
 
 ## 7. Consultar vos el índice
 
@@ -115,7 +147,7 @@ Devuelve una línea de JSON con rutas y puntaje. Filtros: `--cliente`, `--etique
 buscar actualizar
 ```
 
-Si la skill se instaló desde el repositorio, trae la última versión, cuenta qué cambió y reinstala las herramientas solo si hace falta. Nunca toca el índice, las miniaturas ni las etiquetas. Si se instaló desde un zip, lo dice: se instala el zip nuevo encima. `buscar version` muestra cuál está instalada.
+Si la skill se instaló desde el repositorio, trae la última versión, cuenta qué cambió y reinstala las herramientas solo si hace falta. Nunca toca el índice, las miniaturas ni las etiquetas. Al pasar a la 3.1.0, las etiquetas que ya había se convierten solas al formato nuevo la primera vez que se abre el buscador, sin perder nada; si el equipo ya compartía la carpeta de etiquetas, sigue compartida. Si se instaló desde un zip, lo dice: se instala el zip nuevo encima. `buscar version` muestra cuál está instalada.
 
 ## Límites
 
