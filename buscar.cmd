@@ -5,7 +5,8 @@ rem Acentos y enies en las busquedas: la consola pasa a UTF-8
 chcp 65001 >nul
 set "AQUI=%~dp0"
 set "NODO="
-if exist "%USERPROFILE%\.local\node\node.exe" set "NODO=%USERPROFILE%\.local\node\node.exe"
+if defined BUSCAR_NODE if exist "%BUSCAR_NODE%" set "NODO=%BUSCAR_NODE%"
+if not defined NODO if exist "%USERPROFILE%\.local\node\node.exe" set "NODO=%USERPROFILE%\.local\node\node.exe"
 if not defined NODO for /f "delims=" %%i in ('where node 2^>nul') do if not defined NODO set "NODO=%%i"
 if not defined NODO if exist "%ProgramFiles%\nodejs\node.exe" set "NODO=%ProgramFiles%\nodejs\node.exe"
 if not defined NODO if exist "%LOCALAPPDATA%\Programs\nodejs\node.exe" set "NODO=%LOCALAPPDATA%\Programs\nodejs\node.exe"

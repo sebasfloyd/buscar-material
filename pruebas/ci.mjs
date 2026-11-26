@@ -134,7 +134,7 @@ async function principal() {
   r = buscar('buscar', '--etiqueta', 'aprobada'); comprobar(r.json && r.json.total === 2 && r.json.resultados[0].ruta.startsWith(NUEVO), 'las etiquetas siguen pegadas en la ruta nueva', JSON.stringify(r.json && r.json.resultados.map(x => x.ruta)));
 
   console.log('7. Acceso directo y un solo servidor');
-  const escritorio = path.join(os.homedir(), 'Desktop');
+  const escritorio = process.env.BUSCAR_ESCRITORIO || path.join(os.homedir(), 'Desktop');
   const acceso = WIN ? path.join(escritorio, 'Buscar material.cmd') : path.join(escritorio, 'Buscar material.app');
   comprobar(fs.existsSync(acceso), 'preparar dejó el acceso directo en el Escritorio', acceso);
   const antes = buscar('abrir').json;

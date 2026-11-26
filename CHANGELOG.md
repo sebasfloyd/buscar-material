@@ -2,10 +2,12 @@
 
 ## 3.0.0 · noviembre 2026
 - Las búsquedas amplias ("comida" en una biblioteca de comida) ya muestran como coincidencia todo lo que corresponde.
+- Palabras de acá (mozo, medialunas, gaseosa, pileta) se buscan también con el nombre que usan otros países.
+- Buscar sigue fluido mientras indexa: el modelo de visión corre en un proceso aparte.
 - Las reglas de cliente por carpeta reconocen la misma biblioteca en otra compu aunque tenga otro nombre o esté en otra ruta.
 - Acceso directo "Buscar material" en el Escritorio, para abrir el buscador sin pasar por la Mente.
 - Comando `actualizar`.
-- Probado de punta a punta en Windows, Mac con Intel y Mac con Apple Silicon.
+- Guía para el equipo en `guia.pdf`.
 
 ## 2.0.0 · noviembre 2026
 - Resultados separados en "coincidencias" y "relacionadas".

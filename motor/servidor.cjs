@@ -241,6 +241,7 @@ async function atender(req, res) {
   if (anfitrion !== `127.0.0.1:${puerto}` && anfitrion !== `localhost:${puerto}`) { res.writeHead(403); return res.end(); }
   const url = new URL(req.url, 'http://127.0.0.1');
   const ruta = url.pathname;
+  if (ruta === '/api/vivo') return json(res, 200, { vivo: true, pid: process.pid }); // respuesta inmediata: sirve para saber si ya hay un buscador abierto
   if (ruta !== '/api/estado') ultimoUso = Date.now();
 
   if (req.method === 'GET' && (ruta === '/' || ruta === '/index.html')) {
@@ -294,7 +295,8 @@ async function cerrar() {
   indexador.cancelar();
   await medios.cerrar();
   // onnxruntime aborta con un error ruidoso si el proceso sale de forma normal con el modelo cargado; acá ya está todo guardado
-  if (!U.ES_WIN) { try { process.kill(process.pid, 'SIGKILL'); } catch {} }
+  modelo.soltarObrero();
+  try { process.kill(process.pid, 'SIGKILL'); } catch {} // en Windows equivale a terminar el proceso en seco
   process.exit(0);
 }
 
@@ -313,8 +315,10 @@ function escuchar(servidor, p, intentos) {
 function yaHayOtro() {
   const s = U.leerJson(U.ARCHIVO_SERVIDOR, null);
   if (!s || !s.puerto || s.pid === process.pid) return Promise.resolve(false);
-  return new Promise(resolve => {
-    const req = http.get({ host: '127.0.0.1', port: s.puerto, path: '/api/estado', timeout: 1500 }, res => { res.resume(); resolve(res.statusCode === 200); });
+  let procesoVivo = false; try { process.kill(s.pid, 0); procesoVivo = true; } catch {}
+  if (!procesoVivo) return Promise.resolve(false);
+  return new Promise(resolve => { // el proceso existe: se le da tiempo de sobra para contestar, por si está ocupado indexando
+    const req = http.get({ host: '127.0.0.1', port: s.puerto, path: '/api/vivo', timeout: 20000 }, res => { res.resume(); resolve(res.statusCode === 200); });
     req.on('timeout', () => { req.destroy(); resolve(false); }); req.on('error', () => resolve(false));
   });
 }

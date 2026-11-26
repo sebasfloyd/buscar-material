@@ -104,12 +104,17 @@ function emparejar() {
     const carpetas = subcarpetas(b);
     if (!b.uid || !conocidas.has(b.uid)) {
       let mejor = null;
-      if (!b.uid && carpetas && carpetas.length) for (const k of conocidas.values()) {
+      if (carpetas && carpetas.length) for (const k of conocidas.values()) {
         if (tomadas.has(k.lib)) continue;
         const p = parecido(carpetas, k.carpetas);
         if ((p.j >= 0.5 && p.comun >= 2) || (p.j === 1 && p.comun >= 1)) if (!mejor || p.j > mejor.j) mejor = { lib: k.lib, j: p.j };
       }
-      if (mejor) { b.uid = mejor.lib; tomadas.add(b.uid); cambioLocal = true; }
+      if (mejor) { // es una biblioteca que ya figura en el archivo compartido: se adopta su identificador y las reglas propias la siguen
+        const antes = b.uid;
+        b.uid = mejor.lib; tomadas.add(b.uid); cambioLocal = true;
+        if (antes) for (const g of reglas) if (g.lib === antes) { if (reglas.some(x => x.lib === b.uid && x.c === g.c)) g.lib = ''; else g.lib = b.uid; cambioCompartido = true; }
+        reglas = reglas.filter(g => g.lib);
+      }
       else {
         if (!b.uid) { b.uid = 'L-' + require('crypto').randomBytes(4).toString('hex'); cambioLocal = true; }
         if (carpetas) { conocidas.set(b.uid, { lib: b.uid, nombre: b.nombre, carpetas, m: Date.now() }); tomadas.add(b.uid); cambioCompartido = true; }
@@ -220,10 +225,14 @@ function mudar(nueva) {
   carpeta = cfg.etiquetas;
   cargar();
   for (const [h, d] of mias) porHuella.set(h, unir(porHuella.get(h), d));
-  // si en el lugar nuevo ya figura esta misma biblioteca con otro identificador, se adopta el de allá y las reglas propias lo siguen
+  // cargar() ya emparejó: si en el lugar nuevo figuraba esta misma biblioteca, se adoptó su identificador
+  const actuales = new Set(bibliotecas.todas().map(b => b.uid));
   const cambio = new Map();
-  for (const b of bibliotecas.todas()) { const antes = b.uid; if (antes && !conocidas.has(antes)) { b.uid = undefined; emparejar(); if (b.uid !== antes) cambio.set(antes, b.uid); } }
-  for (const g of misReglas) { const lib = cambio.get(g.lib) || g.lib; if (!reglas.some(x => x.lib === lib && x.c === g.c)) reglas.push({ ...g, lib }); }
+  for (const g of misReglas) {
+    let lib = g.lib;
+    if (!actuales.has(lib)) { const k = misConocidas.get(lib); const b = k && bibliotecas.todas().find(x => x.nombre === k.nombre); if (b) { cambio.set(lib, b.uid); lib = b.uid; } }
+    if (!reglas.some(x => x.lib === lib && x.c === g.c)) reglas.push({ ...g, lib });
+  }
   for (const [k, v] of misConocidas) if (!conocidas.has(k) && !cambio.has(k)) conocidas.set(k, v);
   for (const v of misViejas) if (!viejas.some(x => x.b === v.b && x.c === v.c)) viejas.push(v);
   bibliotecas.guardar();

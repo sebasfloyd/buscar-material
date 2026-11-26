@@ -60,7 +60,7 @@ function texto() {
   }
   return _texto;
 }
-function vision(progreso) {
+function visionDirecta(progreso) {
   if (!_vision) {
     V.anotar();
     _vision = cargar(transformers().SiglipVisionModel, { dtype: DTYPE_VISION, device: 'cpu', session_options: { intraOpNumThreads: hilos() }, progress_callback: progreso })
@@ -91,9 +91,48 @@ async function vectorDeTexto(consulta) {
   return v;
 }
 
+// ---------- el modelo de visión corre en un proceso aparte ----------
+// onnxruntime ocupa por completo el proceso donde corre mientras calcula. Si lo hiciera en el del buscador, este se quedaría sin
+// contestar durante cada lote del indexado (segundos; en una compu lenta, muchos). En su propio proceso, buscar sigue fluido
+// mientras indexa. (Un hilo no sirve: onnxruntime-node se cae si se usa desde dos hilos del mismo proceso.)
+const { fork } = require('child_process');
+const EN_HILO = !process.env.BUSCAR_ES_OBRERO && !process.env.BUSCAR_SIN_HILO;
+let obrero = null, turno = 0;
+const pendientes = new Map();
+function hilo() {
+  if (obrero) return obrero;
+  const o = fork(path.join(__dirname, 'obrero.cjs'), [], { serialization: 'advanced', windowsHide: true, stdio: ['ignore', 'ignore', 'inherit', 'ipc'], env: { ...process.env, BUSCAR_ES_OBRERO: '1', BUSCAR_DTYPE_VISION: DTYPE_VISION } });
+  const caer = e => { if (obrero === o) obrero = null; for (const p of pendientes.values()) p.reject(e); pendientes.clear(); };
+  o.on('message', m => { const p = pendientes.get(m.id); if (!p) return; pendientes.delete(m.id); m.error ? p.reject(new Error(m.error)) : p.resolve(m.out); });
+  o.on('error', caer);
+  o.on('exit', () => caer(new Error('el modelo de visión se cerró')));
+  o.unref(); if (o.channel) o.channel.unref();
+  return (obrero = o);
+}
+function pedirAlHilo(mensaje) {
+  return new Promise((resolve, reject) => {
+    const id = ++turno; pendientes.set(id, { resolve, reject });
+    const o = hilo(); if (o.channel) o.channel.ref();
+    o.send({ id, ...mensaje }, e => { if (e) { pendientes.delete(id); reject(e); } });
+  }).finally(() => { if (!pendientes.size && obrero && obrero.channel) obrero.channel.unref(); });
+}
+function soltarObrero() { if (obrero) { try { obrero.kill('SIGKILL'); } catch {} obrero = null; } }
+// Carga el modelo de visión (donde corresponda) y avisa si no se pudo
+function vision() {
+  if (!EN_HILO) return visionDirecta();
+  V.anotar();
+  return pedirAlHilo({ calentar: true });
+}
+
 // tensores: lista de Float32Array (3 x 256 x 256). Devuelve una lista de vectores normalizados.
 async function vectoresDeImagenes(tensores) {
-  const modelo = await vision();
+  if (EN_HILO) {
+    const px = 3 * LADO * LADO, lote = new Float32Array(tensores.length * px);
+    tensores.forEach((x, i) => lote.set(x, i * px));
+    const out = await pedirAlHilo({ n: tensores.length, lote });
+    return Array.from({ length: tensores.length }, (_, i) => out.slice(i * DIM, (i + 1) * DIM));
+  }
+  const modelo = await visionDirecta();
   const t = transformers();
   const px = 3 * LADO * LADO;
   const lote = new Float32Array(tensores.length * px);
@@ -112,6 +151,7 @@ async function liberar() {
     try { const m = await p; const lista = Array.isArray(m) ? m : [m]; for (const x of lista) if (x && x.dispose) await x.dispose(); } catch {}
   }
   _texto = null; _vision = null;
+  soltarObrero();
 }
 
-module.exports = { liberar, MODELO, DIM, DTYPE_VISION, DTYPE_TEXTO, texto, vision, vectorDeTexto, vectoresDeImagenes };
+module.exports = { soltarObrero, liberar, MODELO, DIM, DTYPE_VISION, DTYPE_TEXTO, texto, vision, vectorDeTexto, vectoresDeImagenes };

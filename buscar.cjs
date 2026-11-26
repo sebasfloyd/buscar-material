@@ -74,6 +74,7 @@ async function preparar() {
     podar();
   }
   console.log('Comprobando el modelo (la primera vez baja unos 530 MB)…');
+  process.env.BUSCAR_SIN_HILO = '1'; // acá el modelo se prueba en este mismo proceso, que después termina solo
   const modelo = require('./motor/modelo.cjs');
   try {
     await modelo.texto(); await modelo.vision();
@@ -165,8 +166,14 @@ function pedir(puerto, metodo, ruta, cuerpo, espera = 600000) {
 async function servidorVivo() {
   const s = U.leerJson(U.ARCHIVO_SERVIDOR, null);
   if (!s || !s.puerto) return 0;
-  try { const r = await pedir(s.puerto, 'GET', '/api/estado', undefined, 2500); return r.codigo === 200 && r.json && 'fotos' in r.json ? s.puerto : 0; }
-  catch { return 0; }
+  let procesoVivo = false; try { process.kill(s.pid, 0); procesoVivo = true; } catch (e) { procesoVivo = e.code === 'EPERM'; }
+  if (!procesoVivo) return 0;
+  // El proceso existe. Si tarda en contestar es porque está ocupado (indexando): se insiste en vez de abrir otro.
+  for (let i = 0; i < 8; i++) {
+    try { const r = await pedir(s.puerto, 'GET', '/api/vivo', undefined, 4000); if (r.codigo === 200 && r.json && r.json.vivo) return s.puerto; if (r.codigo === 404) { const e = await pedir(s.puerto, 'GET', '/api/estado', undefined, 8000); return e.codigo === 200 ? s.puerto : 0; } }
+    catch (e) { if (e.code === 'ECONNREFUSED') return 0; }
+  }
+  return 0;
 }
 
 async function asegurarServidor() {

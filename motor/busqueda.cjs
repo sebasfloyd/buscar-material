@@ -1,5 +1,6 @@
 // Búsqueda: parecido semántico + coincidencia por nombre y carpeta, filtros, duplicados y búsquedas de ejemplo.
 const path = require('path');
+const fs = require('fs');
 const indice = require('./indice.cjs');
 const modelo = require('./modelo.cjs');
 const bibliotecas = require('./bibliotecas.cjs');
@@ -13,6 +14,9 @@ const P = {
   zCoincide: Number(process.env.BUSCAR_P_Z1 ?? 4),      // desvíos sobre la mediana para contar como coincidencia
   zRelacionada: Number(process.env.BUSCAR_P_Z2 ?? 2.5), // desvíos para aparecer como relacionada
   pisoCoincide: Number(process.env.BUSCAR_P_PISO ?? 0.06),
+  zRef: Number(process.env.BUSCAR_P_ZREF ?? 5),           // desvíos sobre el fondo de referencia
+  pisoRef: Number(process.env.BUSCAR_P_PISOREF ?? 0.06),
+  fraccionAmplia: Number(process.env.BUSCAR_P_AMPLIA ?? 0.12),
   zFoto: Number(process.env.BUSCAR_P_ZFOTO ?? 3),         // desvíos sobre lo normal para esa foto
   pisoFoto: Number(process.env.BUSCAR_P_PISOFOTO ?? 0.08),
   altoSeguro: Number(process.env.BUSCAR_P_ALTO ?? 0.125), // con este coseno es coincidencia aunque media biblioteca sea de lo mismo
@@ -116,6 +120,22 @@ function propiaDe(r) {
   return e;
 }
 
+// ---------- fondo de referencia: fotos variadas que no dependen de la biblioteca ----------
+// El corte "cuánto se despega del resto de la biblioteca" falla cuando casi toda la biblioteca es de lo mismo ("comida" en un
+// restaurante). Para eso se compara además contra un fondo fijo: huellas de 235 fotos variadas de licencia libre.
+let _ref;
+function referencia() {
+  if (_ref !== undefined) return _ref;
+  _ref = null;
+  try {
+    const v = modelo.DTYPE_VISION === 'fp16' ? 'fp32' : modelo.DTYPE_VISION;
+    const buf = fs.readFileSync(path.join(__dirname, `referencia_${v}.bin`));
+    const n = Math.floor(buf.length / modelo.DIM); _ref = [];
+    for (let i = 0; i < n; i++) { const f = new Float32Array(modelo.DIM); let s = 0; for (let d = 0; d < f.length; d++) { f[d] = buf.readInt8(i * modelo.DIM + d); s += f[d] * f[d]; } s = Math.sqrt(s) || 1; for (let d = 0; d < f.length; d++) f[d] /= s; _ref.push(f); }
+  } catch {}
+  return _ref;
+}
+
 // "IMG_4231", "DSC0042.jpg": eso es un nombre de archivo, no una descripción. Se busca solo por nombre.
 function pareceArchivo(t) { return !/\s/.test(t.trim()) && (/\d{3,}/.test(t) || /_/.test(t) || /\.[a-z0-9]{2,4}$/i.test(t)); }
 
@@ -123,8 +143,22 @@ function pareceArchivo(t) { return !/\s/.test(t.trim()) && (/\d{3,}/.test(t) || 
 const REFORMULAR = [
   [/ (much[oa]s?|un monton de|llen[oa] de) (gente|personas) /, ['una multitud', 'un grupo grande de personas']], // medido: de 9 a 10 aciertos en los 10 primeros
 ];
+// Palabras de acá que el modelo conoce mejor con el nombre que se usa en otros países. Se busca con todas y se promedia.
+// Medido con "mozo sirviendo": de 2 a 4 aciertos sobre 6 posibles en los 10 primeros.
+const REGIONALES = {
+  mozo: ['camarero', 'mesero'], moza: ['camarera', 'mesera'], mozos: ['camareros', 'meseros'], mozas: ['camareras', 'meseras'],
+  medialuna: ['croissant'], medialunas: ['croissants'], facturas: ['bollería y pasteles'], gaseosa: ['refresco'], gaseosas: ['refrescos'],
+  pochoclo: ['palomitas de maíz'], pochoclos: ['palomitas de maíz'], frutilla: ['fresa'], frutillas: ['fresas'], palta: ['aguacate'], paltas: ['aguacates'],
+  choclo: ['mazorca de maíz'], remera: ['camiseta'], remeras: ['camisetas'], pileta: ['piscina'], heladera: ['refrigerador'], birra: ['cerveza'],
+  pancho: ['hot dog'], panchos: ['hot dogs'], vereda: ['acera'], colectivo: ['autobús'], campera: ['chaqueta'], camperas: ['chaquetas'],
+  anteojos: ['gafas'], valija: ['maleta'], valijas: ['maletas'], pollera: ['falda'], malla: ['traje de baño'], celu: ['teléfono celular'],
+};
 async function vectorDeConsulta(texto) {
   const variantes = [texto];
+  if (!process.env.BUSCAR_SIN_REGIONALES) {
+    const palabras = texto.toLowerCase().split(/\s+/);
+    palabras.forEach((p, i) => { const s = REGIONALES[p.replace(/[.,;:!?¿¡"]/g, '')]; if (s) for (const x of s) variantes.push(palabras.map((w, k) => k === i ? x : w).join(' ')); });
+  }
   if (process.env.BUSCAR_ENSAMBLE) variantes.push('una foto de ' + texto);
   const t = ' ' + normalizar(texto) + ' ';
   for (const [re, extras] of REFORMULAR) if (re.test(t)) variantes.push(...extras);
@@ -200,6 +234,16 @@ async function ordenar(p) {
       const med = todos.length ? todos[todos.length >> 1] : 0;
       const desv = todos.map(v => Math.abs(v - med)).sort((a, b) => a - b);
       const mad = Math.max(0.004, (desv[desv.length >> 1] || 0) * 1.4826);
+      // lo mismo contra el fondo de referencia
+      let medR = 0, madR = 0, amplia = false;
+      const ref = P.zRef < 90 ? referencia() : null;
+      if (ref) {
+        const sr = ref.map(v => { let d = 0; for (let i = 0; i < v.length; i++) d += v[i] * qa[i]; return d; }).sort((a, b) => a - b);
+        medR = sr[sr.length >> 1];
+        madR = Math.max(0.004, sr.map(v => Math.abs(v - medR)).sort((a, b) => a - b)[sr.length >> 1] * 1.4826);
+        let n = 0; for (const v of todos) if ((v - medR) / madR >= P.zRef) n++;
+        amplia = n / (todos.length || 1) >= P.fraccionAmplia; // buena parte de la biblioteca es de esto: consulta amplia
+      }
       res = [];
       for (const x of filtrados) {
         if (x[6] === null) { if (x[3]) res.push(x); continue; }
@@ -209,7 +253,9 @@ async function ordenar(p) {
         // segunda mirada, por foto: ¿esta consulta le queda mucho mejor que una frase cualquiera? Rescata las búsquedas amplias
         // ("comida" en la biblioteca de un restaurante), donde casi todo coincide y nada se despega del resto.
         const pr = propiaDe(r), zf = (x[1] - pr[1]) / pr[2];
-        const fuerte = (z >= P.zCoincide && x[1] >= P.pisoCoincide) || (zf >= P.zFoto && x[1] >= P.pisoFoto) || x[1] >= P.altoSeguro;
+        const zr = ref ? (x[6] - medR) / madR : -99;
+        const fuerte = (z >= P.zCoincide && x[1] >= P.pisoCoincide) || (zf >= P.zFoto && x[1] >= P.pisoFoto) || x[1] >= P.altoSeguro
+          || (amplia && zr >= P.zRef && x[1] >= P.pisoRef);
         if (x[3] || fuerte) x[4] = 0;
         else if (z >= P.zRelacionada && x[1] >= P.pisoCoincide * 0.8) x[4] = 1;
         else continue;
