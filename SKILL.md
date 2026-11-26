@@ -26,7 +26,7 @@ El lanzador prueba el Node de la app de la Mente (`~/.local/node`), el del siste
 buscar preparar
 ```
 
-Avisá antes: baja unos 600 MB (herramientas y modelo), ocupa cerca de 700 MB en disco y tarda entre 1 y 10 minutos según la conexión. Necesita internet solo esta vez; después todo funciona sin conexión. Si se corta, se vuelve a correr y retoma. Corré en segundo plano si tu entorno lo permite.
+Avisá antes: baja unos 600 MB (herramientas y modelo), ocupa unos 650 MB en disco y tarda entre 1 y 10 minutos según la conexión. Necesita internet solo esta vez; después todo funciona sin conexión. Si se corta, se vuelve a correr y retoma. Corré en segundo plano si tu entorno lo permite.
 
 `preparar` deja en el Escritorio un acceso directo, "Buscar material", que abre el buscador sin pasar por vos. Decile a la persona que lo use para el día a día: así buscar no gasta nada. Abrirlo dos veces no abre dos buscadores.
 
@@ -40,7 +40,7 @@ buscar indexar
 ```
 
 - Puede ser un disco externo. Si después cambia de letra o de ruta: `buscar biblioteca mover "<nombre>" "<carpeta nueva>"` conserva el índice y no vuelve a indexar.
-- `indexar` avanza a entre 5 y 8 fotos por segundo en una Mac con Apple Silicon (10.000 fotos, entre 20 y 35 minutos). Decí cuánto va a tardar antes de arrancar y corré en segundo plano. Se puede buscar mientras indexa.
+- `indexar` avanza a entre 4 y 8 fotos por segundo en una Mac con Apple Silicon (10.000 fotos, entre 20 y 40 minutos). El indexado arranca solo al agregar la biblioteca; `estado` dice cuántos archivos encontró y cuántos lleva. Decí cuánto va a tardar antes de arrancar y corré en segundo plano. Se puede buscar mientras indexa.
 - Es incremental y retoma si se corta. `--reintentar` vuelve a probar los archivos que fallaron. Saltea carpetas ocultas, `node_modules`, cachés y bibliotecas de Fotos o Lightroom.
 - Al terminar contá cuántas fotos y videos quedaron, cuántos sin miniatura (`sinMiniatura`) y si los videos quedaron solo por nombre (`videosSoloPorNombre`).
 
@@ -104,6 +104,7 @@ buscar buscar "<descripción en español>" --n 20 --cliente "<cliente>" --sin-us
 
 Devuelve una línea de JSON con rutas y puntaje. Filtros: `--cliente`, `--etiqueta "a,b"`, `--sin-usar` o `--usadas`, `--tipo foto|video`, `--orientacion vertical|horizontal|cuadrada`, `--desde` y `--hasta` (AAAA-MM-DD), `--orden fecha`. Sin texto, lista lo que pasa los filtros. `estado` lista clientes y bibliotecas. `duplicados` lista los grupos repetidos.
 
+- Los resultados ya vienen ordenados del más al menos relevante; `total` es cuántos hay en todo el índice aunque pidas menos con `--n`. El `puntaje` es orientativo: no lo uses para reordenar.
 - `coinciden` dice cuántos de los resultados son coincidencias firmes; los que traen `relacionada: true` son apenas parecidos: no los propongas sin mirarlos. Si `coinciden` es 0, lo más probable es que no haya material de eso: decilo en vez de forzar.
 - `porNombre` indica que coincidió el nombre del archivo, la carpeta, el cliente o una etiqueta. En videos, `segundo` es el momento donde aparece lo buscado.
 - Hacé varias búsquedas cortas y concretas antes que una larga. Abrí con Read solo las pocas imágenes que vayas a proponer.
@@ -121,5 +122,5 @@ Si la skill se instaló desde el repositorio, trae la última versión, cuenta q
 - Encuentra bien qué hay en la foto (comida, personas, lugares, objetos, capturas, texto grande). El color de fondo ("sobre fondo negro") se usa para ordenar, no para filtrar. No cuenta: "mucha gente" o "tres platos" los toma como idea general.
 - Lee algo del texto grande que aparece en la imagen, no la letra chica.
 - HEIC, PSD, TIFF y RAW (probado con CR2, ARW, NEF y DNG) se indexan con su vista previa. Un RAW sin vista previa embebida o un PSD guardado sin compatibilidad queda sin miniatura y se encuentra solo por nombre.
-- Probado en Mac con Apple Silicon. En Windows y en Mac con Intel está escrito y revisado para funcionar, con pruebas de las rutas de Windows, pero todavía no corrió en una compu real: si falla ahí, mostrá el error tal cual.
+- Probado en Mac con Apple Silicon. Los binarios de Mac con Intel pasaron el flujo completo en emulación (Rosetta), no en una Intel real. En Windows está escrito y revisado, con pruebas de sus rutas, pero todavía no corrió en una compu real: si falla ahí, mostrá el error tal cual.
 - Cada índice sigue con la variante del modelo de visión con que se creó (queda anotada en `datos/meta.json`); un índice hecho con la versión anterior sigue funcionando sin volver a indexar ni bajar nada. Si en una compu con Intel el indexado anda muy lento, se puede probar `BUSCAR_DTYPE_VISION=fp32` antes de indexar por primera vez (pesa 320 MB más). La variante `q8` es más rápida pero se midió y busca peor en español: no usarla.

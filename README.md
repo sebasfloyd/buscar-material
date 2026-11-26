@@ -10,7 +10,7 @@ Un buscador de fotos y videos que corre en tu compu. Escribís lo que buscás ("
 ## Qué pide
 
 - Mac o Windows, con la app de la Mente (o Claude Code).
-- Unos 700 MB libres y conexión a internet solo la primera vez (baja unos 600 MB).
+- Unos 650 MB libres y conexión a internet solo la primera vez (baja unos 600 MB).
 - Las carpetas con el material, en la compu o en un disco externo.
 
 ## Cómo se instala
