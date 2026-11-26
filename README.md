@@ -1,5 +1,10 @@
 # Buscar material
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/busqueda-oscuro.jpg">
+  <img src="docs/busqueda-claro.jpg" alt="Búsqueda de "niguiris de salmón": arriba las coincidencias, abajo las relacionadas">
+</picture>
+
 Un buscador de fotos y videos que corre en tu compu. Escribís lo que buscás ("niguiris de salmón sobre fondo negro") y aparece al instante, aunque los archivos se llamen `IMG_4203.jpg`.
 
 - **No sube nada a internet.** Un modelo de visión mira tus carpetas una vez, en tu compu, y arma un índice local.
@@ -32,6 +37,12 @@ La Mente te va a avisar cuánto tarda, te va a preguntar qué carpeta querés in
 3. Flechas para moverte, barra espaciadora para ver en grande, Enter para abrir el archivo.
 
 La guía completa, con capturas, está en `guia.pdf`.
+
+| Al abrir | Barra espaciadora: ver en grande |
+| --- | --- |
+| <picture>  <source media="(prefers-color-scheme: dark)" srcset="docs/inicio-oscuro.jpg">  <img src="docs/inicio-claro.jpg" alt="Pantalla inicial con la barra de búsqueda e ideas sacadas del propio material"></picture> | <picture>  <source media="(prefers-color-scheme: dark)" srcset="docs/vista-oscuro.jpg">  <img src="docs/vista-claro.jpg" alt="Vista en grande de una foto, con su carpeta, etiquetas y acciones"></picture> |
+
+<sub>Las fotos de las capturas son de dominio público, de Wikimedia Commons.</sub>
 
 ## Cómo se actualiza
 
