@@ -1,5 +1,9 @@
 # Cambios
 
+## 3.0.1 · noviembre 2026
+- Windows: la preparación de la primera vez ya no falla al cargar el modelo recién descargado.
+- El buscador pasa a ser libre, con licencia MIT.
+
 ## 3.0.0 · noviembre 2026
 - Las búsquedas amplias ("comida" en una biblioteca de comida) ya muestran como coincidencia todo lo que corresponde.
 - Palabras de acá (mozo, medialunas, gaseosa, pileta) se buscan también con el nombre que usan otros países.

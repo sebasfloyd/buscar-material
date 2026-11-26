@@ -39,9 +39,16 @@ function transformers() {
 }
 
 // Primero intenta con lo que ya está descargado (funciona sin internet); si falta, lo baja.
+// Recién bajado, el archivo puede seguir abierto para escritura un instante (la biblioteca no espera a que se cierre) y en
+// Windows el motor no puede abrirlo mientras tanto ("system error number 13"). Por eso se reintenta: ya está en disco.
 async function cargar(Clase, opciones) {
-  try { return await Clase.from_pretrained(MODELO, { ...opciones, local_files_only: true }); }
-  catch { return await Clase.from_pretrained(MODELO, opciones); }
+  try { return await Clase.from_pretrained(MODELO, { ...opciones, local_files_only: true }); } catch {}
+  let ultimo;
+  for (let i = 0; i < 4; i++) {
+    try { return await Clase.from_pretrained(MODELO, opciones); }
+    catch (e) { ultimo = e; await new Promise(r => setTimeout(r, 1500 * (i + 1))); }
+  }
+  throw ultimo;
 }
 
 function hilos() {

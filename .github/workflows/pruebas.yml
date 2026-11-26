@@ -17,6 +17,10 @@ jobs:
         with:
           node-version: 22
       - uses: FedericoCarboni/setup-ffmpeg@v3
+        if: runner.arch == 'X64'
+      - name: ffmpeg (Mac con chip Apple)
+        if: runner.arch == 'ARM64'
+        run: brew install ffmpeg
       - name: Flujo completo con el lanzador real
         run: node pruebas/ci.mjs
       - name: Capturas de la interfaz
