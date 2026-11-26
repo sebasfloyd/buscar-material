@@ -2,6 +2,7 @@ name: pruebas
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 jobs:
   flujo:
@@ -21,7 +22,10 @@ jobs:
       - name: ffmpeg (Mac con chip Apple)
         if: runner.arch == 'ARM64'
         run: brew install ffmpeg
+      - name: Etiquetas compartidas entre dos compus
+        run: node pruebas/compartidas.mjs
       - name: Flujo completo con el lanzador real
+        if: always()
         run: node pruebas/ci.mjs
       - name: Capturas de la interfaz
         if: always()

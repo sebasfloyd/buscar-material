@@ -140,7 +140,8 @@ function estadoGeneral() {
 const rutas = {
   'GET /api/estado': async (req, res) => { etiquetas.refrescar(); json(res, 200, estadoGeneral()); },
 
-  'POST /api/buscar': async (req, res, cuerpo) => json(res, 200, await busqueda.buscar(cuerpo)),
+  // antes de buscar se mira (como mucho cada 2 s) si llegaron etiquetas de otra compu: es solo comparar tamaño y fecha de unos pocos archivos
+  'POST /api/buscar': async (req, res, cuerpo) => { etiquetas.refrescar(2000); json(res, 200, await busqueda.buscar(cuerpo)); },
 
   'POST /api/imagen': async (req, res, _c, crudo) => {
     try {
@@ -194,9 +195,13 @@ const rutas = {
     json(res, 200, { ok: true });
   },
 
-  'POST /api/etiquetar': async (req, res, c) => json(res, 200, { ok: true, n: etiquetas.etiquetar(c.ids || [], c.agregar || [], c.quitar || []) }),
+  'POST /api/etiquetar': async (req, res, c) => {
+    try { json(res, 200, { ok: true, n: etiquetas.etiquetar(c.ids || [], c.agregar || [], c.quitar || []) }); } catch (e) { error(res, 200, e.message); }
+  },
 
-  'POST /api/usar': async (req, res, c) => json(res, 200, { ok: true, n: etiquetas.marcarUso(c.ids || [], !!c.usada, c.nota, /^\d{4}-\d\d-\d\d$/.test(c.fecha || '') ? c.fecha : undefined) }),
+  'POST /api/usar': async (req, res, c) => {
+    try { json(res, 200, { ok: true, n: etiquetas.marcarUso(c.ids || [], !!c.usada, c.nota, /^\d{4}-\d\d-\d\d$/.test(c.fecha || '') ? c.fecha : undefined) }); } catch (e) { error(res, 200, e.message); }
+  },
 
   'POST /api/cliente': async (req, res, c) => {
     try {
@@ -211,8 +216,19 @@ const rutas = {
     } catch (e) { error(res, 200, e.message); }
   },
 
+  // carpeta: dónde se guardan las etiquetas (la que el equipo sincroniza por git); dejar: de vuelta solo en esta compu
   'POST /api/etiquetas-ubicacion': async (req, res, c) => {
-    try { json(res, 200, { ok: true, carpeta: etiquetas.mudar(c.carpeta) }); } catch (e) { error(res, 200, e.message); }
+    try {
+      if (c.autor != null && String(c.autor).trim()) etiquetas.fijarAutor(c.autor);
+      if (c.dejar) etiquetas.mudar(null);
+      else if (c.carpeta) etiquetas.mudar(String(c.carpeta));
+      json(res, 200, { ok: true, carpeta: etiquetas.ubicacion(), etq: etiquetas.resumen() });
+    } catch (e) { error(res, 200, e.message); }
+  },
+
+  // lista acordada de etiquetas del equipo
+  'POST /api/lista': async (req, res, c) => {
+    try { json(res, 200, { ok: true, ...etiquetas.cambiarLista(c.agregar || [], c.quitar || []) }); } catch (e) { error(res, 200, e.message); }
   },
 
   // De rutas completas a ids del índice, para etiquetar o marcar desde la línea de comandos

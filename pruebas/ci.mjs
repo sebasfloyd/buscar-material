@@ -146,7 +146,27 @@ async function principal() {
   const despues = buscar('abrir').json;
   comprobar(antes && despues && antes.url === despues.url, 'abrir dos veces no levanta otro servidor', JSON.stringify([antes, despues]));
   R.url = despues && despues.url;
+
+  console.log('8. Etiquetas compartidas, con el índice de verdad');
+  const COMPARTIDA = path.join(TRABAJO, 'Mente del equipo', 'material', 'etiquetas');
+  r = buscar('etiquetas', 'compartir', COMPARTIDA, '--autor', 'Prueba'); comprobar(r.json && r.json.compartida === true && r.json.autor === 'Prueba', 'comparte las etiquetas en una carpeta', r.salida);
+  r = buscar('buscar', '--etiqueta', 'aprobada'); comprobar(r.json && r.json.total === 2, 'lo etiquetado antes de compartir sigue ahí', JSON.stringify(r.json && r.json.total));
+  const propio = path.join(COMPARTIDA, ...r0(buscar('etiquetas', 'estado').json).archivoPropio.split('/'));
+  const mios = fs.existsSync(propio) ? fs.readFileSync(propio, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)) : [];
+  const conHuella = mios.find(e => e.tipo === 'etiquetas' && e.h);
+  comprobar(!!conHuella, 'el archivo de esta compu quedó en la carpeta compartida, con la huella de cada foto', propio);
+  if (conHuella) { // otra compu del equipo etiqueta y marca la misma foto: llega como un archivo más en la carpeta
+    fs.writeFileSync(path.join(COMPARTIDA, 'eventos', 'otra-compu-000000.jsonl'), [
+      { id: 'otra-1', ts: Date.now() + 5, por: 'Otra persona', tipo: 'etiquetas', h: conHuella.h, mas: ['de otra compu'] },
+      { id: 'otra-2', ts: Date.now() + 6, por: 'Otra persona', tipo: 'usada', h: conHuella.h, f: '2026-11-20', nota: 'Historia del viernes' },
+    ].map(e => JSON.stringify(e)).join('\r\n') + '\r\n');
+    r = buscar('buscar', '--etiqueta', 'de otra compu');
+    comprobar(r.json && r.json.total === 1 && r.json.resultados[0].usadaPor === 'Otra persona' && r.json.resultados[0].etiquetas.includes('aprobada'), 'lo que etiqueta y marca otra compu aparece sin reindexar, con quién lo marcó', JSON.stringify(r.json && r.json.resultados));
+  }
+  r = buscar('etiquetas', 'lista', 'agregar', 'aprobada,para redes'); comprobar(r.json && r.json.lista.length === 2, 'lista acordada de etiquetas', JSON.stringify(r.json));
+  r = buscar('etiquetas', 'lista', 'ver'); comprobar(r.json && r.json.sueltas.some(x => x.nombre === 'promoción de verano') && r.json.lista.some(x => x.nombre === 'aprobada' && x.fotos === 2), 'separa las de la lista de las sueltas', JSON.stringify(r.json));
 }
+function r0(j) { return j || { archivoPropio: '' }; }
 
 try { await principal(); } catch (e) { console.log('ERROR', e.message); R.fallas.push('excepción: ' + e.message.slice(0, 1500)); }
 const tiempos = R.busquedas.map(b => b.msMotor).filter(x => x != null).sort((a, b) => a - b);

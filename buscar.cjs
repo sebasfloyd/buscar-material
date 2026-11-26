@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Buscador local de fotos y videos. Uso: node buscar.cjs <comando>
 //   preparar | abrir | biblioteca agregar|listar|quitar | indexar | estado | buscar "<texto>" | duplicados | cerrar
-//   etiquetar | marcar-usada | etiquetas listar|ubicacion | cliente asignar|renombrar | actualizar | version
+//   etiquetar | marcar-usada | etiquetas listar|compartir|estado|autor|lista | cliente asignar|renombrar | actualizar | version
 // No necesita dependencias propias: las instala "preparar" en ~/.mente-ai/buscar-material.
 const path = require('path');
 const fs = require('fs');
@@ -313,7 +313,7 @@ const comandos = {
         if (i >= r.coinciden) o.relacionada = true;
         if (it.c) o.cliente = it.c;
         if (it.et && it.et.length) o.etiquetas = it.et;
-        if (it.us) o.usada = it.us.n ? it.us.f + ' · ' + it.us.n : it.us.f;
+        if (it.us) { o.usada = it.us.n ? it.us.f + ' · ' + it.us.n : it.us.f; if (it.us.por) o.usadaPor = it.us.por; }
         if (it.t != null) o.segundo = it.t;
         if (it.nm) o.porNombre = true;
         if (!e.bibliotecas.find(b => b.id === it.l)?.conectada) o.desconectado = true;
@@ -346,16 +346,54 @@ const comandos = {
     console.log(JSON.stringify({ [deshacer ? 'desmarcadas' : 'marcadas']: r.n, noEncontradas: faltan.length ? faltan : undefined }));
   },
 
+  // etiquetas listar · etiquetas compartir "<carpeta>" [--autor "Nombre"] | --dejar · etiquetas estado · etiquetas autor ["Nombre"]
+  // etiquetas lista ver | agregar "a,b" | quitar "a,b"
   async etiquetas() {
     const sub = args.shift();
-    if (sub === 'ubicacion') {
+    const estadoCompartido = e => {
+      const c = e.etq.compartida;
+      return {
+        compartida: c.activa, carpeta: c.carpeta, noEncuentroLaCarpeta: c.falta || undefined, autor: c.autor, archivoPropio: c.archivo,
+        ultimaLectura: c.leido ? new Date(c.leido).toISOString() : null, ultimaNovedadDeOtraCompu: c.novedad ? new Date(c.novedad).toISOString() : null,
+        eventos: c.eventos, lineasIlegibles: c.lineasRotas || undefined,
+        personas: c.personas.map(p => ({ nombre: p.nombre, cambios: p.eventos, ultimo: new Date(p.ultimo).toISOString() })),
+        lista: e.etq.lista, etiquetasSueltas: e.etq.etiquetas.filter(t => !t.lista).map(t => t.nombre),
+        deFotosQueEstaCompuNoTiene: e.etq.sinIndexar || undefined,
+      };
+    };
+    if (sub === 'compartir' || sub === 'ubicacion') { // "ubicacion" es el nombre anterior del mismo comando
+      const dejar = !!opcion('dejar', false), quien = opcion('autor', undefined);
       const dir = args.shift();
-      if (!dir) { const e = await api('GET', '/api/estado'); return console.log(JSON.stringify({ carpeta: e.etq.carpeta })); }
-      const r = await api('POST', '/api/etiquetas-ubicacion', { carpeta: path.resolve(dir) });
-      return console.log(JSON.stringify({ carpeta: r.carpeta, nota: 'Las etiquetas que ya había en los dos lugares se unieron.' }));
+      if (!dir && !dejar && typeof quien !== 'string') return console.log(JSON.stringify(estadoCompartido(await api('GET', '/api/estado'))));
+      const r = await api('POST', '/api/etiquetas-ubicacion', { carpeta: dir ? path.resolve(dir) : undefined, dejar, autor: typeof quien === 'string' ? quien : undefined });
+      const c = r.etq.compartida;
+      return console.log(JSON.stringify({
+        compartida: c.activa, carpeta: c.carpeta, autor: c.autor, archivoPropio: c.archivo, eventos: c.eventos, personas: c.personas.map(p => p.nombre),
+        nota: !dir && !dejar ? 'Nombre de autor guardado.' : c.activa ? 'Lo que ya había etiquetado esta compu se sumó a lo compartido, sin pisar nada. Los cambios viajan cuando la carpeta se sincroniza (subir y bajar); el buscador los toma solo.' : 'Las etiquetas quedaron solo en esta compu, con todo lo que había hasta ahora. La carpeta compartida no se tocó.',
+      }));
+    }
+    if (sub === 'estado') return console.log(JSON.stringify(estadoCompartido(await api('GET', '/api/estado'))));
+    if (sub === 'autor') {
+      const quien = args.shift();
+      if (quien) await api('POST', '/api/etiquetas-ubicacion', { autor: quien });
+      const e = await api('GET', '/api/estado');
+      return console.log(JSON.stringify({ autor: e.etq.compartida.autor, nota: quien ? 'Vale para lo que se etiquete o marque desde ahora.' : undefined }));
+    }
+    if (sub === 'lista') {
+      const que = args.shift() || 'ver';
+      const cuales = args.join(',').split(',').map(x => x.trim()).filter(Boolean);
+      if (que === 'agregar' || que === 'quitar') {
+        if (!cuales.length) salir(`Decí cuáles: etiquetas lista ${que} "carta verano,aprobada"`);
+        const r = await api('POST', '/api/lista', que === 'agregar' ? { agregar: cuales } : { quitar: cuales });
+        return console.log(JSON.stringify({ lista: r.lista, [que === 'agregar' ? 'agregadas' : 'quitadas']: que === 'agregar' ? r.agregadas : r.quitadas, nota: que === 'quitar' ? 'Solo salen de la lista: las fotos que ya las tenían las conservan.' : undefined }));
+      }
+      if (que !== 'ver') salir('Uso: etiquetas lista ver | agregar "a,b" | quitar "a,b"');
+      const e = await api('GET', '/api/estado');
+      const enUso = new Map(e.etq.etiquetas.map(t => [t.nombre, t.n]));
+      return console.log(JSON.stringify({ lista: e.etq.lista.map(nombre => ({ nombre, fotos: enUso.get(nombre) || 0 })), sueltas: e.etq.etiquetas.filter(t => !t.lista).map(t => ({ nombre: t.nombre, fotos: t.n })) }));
     }
     const e = await api('GET', '/api/estado');
-    console.log(JSON.stringify({ etiquetas: e.etq.etiquetas, usadas: e.etq.usadas, clientesPorCarpeta: e.etq.reglas, carpeta: e.etq.carpeta }));
+    console.log(JSON.stringify({ etiquetas: e.etq.etiquetas, usadas: e.etq.usadas, clientesPorCarpeta: e.etq.reglas, lista: e.etq.lista, carpeta: e.etq.carpeta, compartida: e.etq.compartida.activa }));
   },
 
   // cliente asignar "<carpeta>" "<Cliente>"  ·  cliente renombrar "<actual>" "<nuevo>"  (si el nuevo ya existe, los une)
@@ -394,7 +432,7 @@ const comandos = {
   },
 
   async ayuda() {
-    console.log('Comandos: preparar · abrir · biblioteca agregar "<carpeta>" [--nombre X] · biblioteca listar · biblioteca quitar <nombre> · indexar [--reintentar] · estado · buscar "<texto>" [--n 20 --cliente X --tipo foto|video --orientacion vertical|horizontal|cuadrada --desde AAAA-MM-DD --hasta AAAA-MM-DD --orden fecha] · duplicados · etiquetar <rutas> --agregar "a,b" · marcar-usada <rutas> [--nota X] · etiquetas listar|ubicacion "<carpeta>" · cliente asignar "<carpeta>" "<Cliente>" · cliente renombrar "<A>" "<B>" · actualizar · version · cerrar');
+    console.log('Comandos: preparar · abrir · biblioteca agregar "<carpeta>" [--nombre X] · biblioteca listar · biblioteca quitar <nombre> · indexar [--reintentar] · estado · buscar "<texto>" [--n 20 --cliente X --tipo foto|video --orientacion vertical|horizontal|cuadrada --desde AAAA-MM-DD --hasta AAAA-MM-DD --orden fecha] · duplicados · etiquetar <rutas> --agregar "a,b" [--quitar "c"] · marcar-usada <rutas> [--nota X] [--deshacer] · etiquetas listar · etiquetas compartir "<carpeta>" [--autor "Nombre"] | --dejar · etiquetas estado · etiquetas autor "<Nombre>" · etiquetas lista ver|agregar "a,b"|quitar "a,b" · cliente asignar "<carpeta>" "<Cliente>" · cliente renombrar "<A>" "<B>" · actualizar · version · cerrar');
   },
 };
 

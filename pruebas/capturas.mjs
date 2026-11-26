@@ -14,6 +14,16 @@ for (const tema of ['light', 'dark']) {
   await p.screenshot({ path: path.join(SALIDA, `${res.sistema}-busqueda-${tema}.png`) });
   await p.focus('#q'); await p.keyboard.press('ArrowDown'); await p.keyboard.press(' '); await p.waitForTimeout(1200);
   await p.screenshot({ path: path.join(SALIDA, `${res.sistema}-vista-rapida-${tema}.png`) });
+  // etiquetas: el editor (con la lista del equipo y quién la marcó como usada) y la hoja de lo compartido
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  await p.keyboard.press('t'); await p.waitForSelector('#etq .entrada', { timeout: 10000 }); await p.waitForTimeout(400);
+  await p.screenshot({ path: path.join(SALIDA, `${res.sistema}-etiquetas-${tema}.png`) });
+  await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+  if (await p.isVisible('#comp')) {
+    await p.click('#comp'); await p.waitForSelector('#hoja', { timeout: 10000 }); await p.waitForTimeout(400);
+    await p.screenshot({ path: path.join(SALIDA, `${res.sistema}-equipo-${tema}.png`) });
+    await p.keyboard.press('Escape');
+  }
 }
 await b.close();
 fs.writeFileSync(path.join(SALIDA, `consola-${res.sistema}.json`), JSON.stringify(errores, null, 1));
