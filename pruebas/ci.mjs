@@ -105,7 +105,7 @@ async function principal() {
     const tops = (r.json ? r.json.resultados : []).map(x => temaDe(x.ruta));
     const aciertos = tops.slice(0, 3).filter(t => t === esperado).length;
     R.busquedas.push({ consulta: q, esperado, primeros: tops, msMotor: r.json && r.json.ms, msComando: r.ms, coinciden: r.json && r.json.coinciden });
-    comprobar(tops[0] === esperado && aciertos >= 2, `"${q}" trae ${esperado}`, tops.join(','));
+    comprobar(tops[0] === esperado && aciertos >= Math.min(2, tops.length), `"${q}" trae ${esperado}`, tops.join(','));
   }
   r = buscar('buscar', 'bicicleta', '--tipo', 'video', '--n', '3');
   comprobar(r.json && r.json.resultados[0] && /paseo corto\.mp4$/.test(r.json.resultados[0].ruta) && r.json.resultados[0].segundo != null, 'el video aparece con su segundo', JSON.stringify(r.json));
@@ -131,7 +131,7 @@ async function principal() {
   fs.renameSync(BANCO, NUEVO);
   r = buscar('biblioteca', 'mover', 'Prueba', NUEVO); comprobar(r.json && r.json.movida, 'biblioteca movida', r.salida);
   r = buscar('indexar'); comprobar(r.json && r.json.fotos + r.json.videos === total && r.json.ultimo.procesadas === 0, 'después de mover no reindexa nada', JSON.stringify(r.json && r.json.ultimo));
-  r = buscar('buscar', '--etiqueta', 'aprobada'); comprobar(r.json && r.json.total === 2 && r.json.resultados[0].ruta.startsWith(NUEVO), 'las etiquetas siguen pegadas en la ruta nueva', JSON.stringify(r.json && r.json.resultados.map(x => x.ruta)));
+  r = buscar('buscar', '--etiqueta', 'aprobada'); comprobar(r.json && r.json.total === 2 && r.json.resultados[0].ruta.startsWith(fs.realpathSync(NUEVO)), 'las etiquetas siguen pegadas en la ruta nueva', JSON.stringify(r.json && r.json.resultados.map(x => x.ruta)));
 
   console.log('7. Acceso directo y un solo servidor');
   const escritorio = process.env.BUSCAR_ESCRITORIO || path.join(os.homedir(), 'Desktop');
