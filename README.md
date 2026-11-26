@@ -17,9 +17,9 @@ Un buscador de fotos y videos que corre en tu compu. Escribís lo que buscás ("
 
 Abrí la Mente y pegá esto en el chat:
 
-> Instalá el buscador de material desde este repositorio: (pegá acá la dirección que te pasaron). Seguí su INSTALAR.md.
+> Instalá el buscador de material desde este repositorio: https://github.com/sebasfloyd/buscar-material. Seguí su INSTALAR.md.
 
-Si no tenés acceso al repositorio, pedí el archivo `buscar-material.zip`, arrastralo al chat y escribí:
+Si preferís no usar git, bajá el zip desde el botón verde **Code → Download ZIP** de esta página, arrastralo al chat y escribí:
 
 > Instalá esta skill.
 
@@ -41,6 +41,8 @@ Pegá en el chat de la Mente:
 
 Trae la última versión y te cuenta qué cambió. El índice y las etiquetas no se pierden. Los cambios de cada versión están en `CHANGELOG.md`.
 
-## Uso
+## Licencia
 
-Software de uso autorizado por Ruptive AI. Ver `AVISO.md`.
+Libre, con licencia MIT (ver `LICENSE`): se puede usar, copiar, modificar y compartir. Hecho por Ruptive AI.
+
+Usa componentes de terceros con sus propias licencias, que se descargan al prepararlo (entre otros: Transformers.js y el modelo SigLIP 2, Apache 2.0; sharp, Apache 2.0; ExifTool; ag-psd, MIT; heic-decode, ISC).

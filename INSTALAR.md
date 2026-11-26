@@ -9,7 +9,7 @@ La skill va en `.claude/skills/buscar-material/` dentro de la carpeta de la Ment
 - **Desde el repositorio** (te pasaron una dirección de GitHub):
   `git clone <dirección> ".claude/skills/buscar-material"`
   Si falla por permisos, decile a la persona que pida acceso al repositorio o el archivo zip, y frená.
-- **Desde un zip** (te arrastraron `buscar-material.zip`): descomprimilo dentro de `.claude/skills/buscar-material/`. Tiene que quedar `SKILL.md` directamente en esa carpeta, no en una subcarpeta.
+- **Desde un zip** (te arrastraron `buscar-material.zip`): descomprimilo dentro de `.claude/skills/buscar-material/`. Tiene que quedar `SKILL.md` directamente en esa carpeta, no en una subcarpeta. El zip que se baja de GitHub trae todo dentro de una subcarpeta `buscar-material-main`: después de descomprimir, mové su contenido un nivel arriba y borrá la subcarpeta vacía.
   - Mac: `mkdir -p .claude/skills/buscar-material && unzip -o "<zip>" -d .claude/skills/buscar-material`
   - Windows (PowerShell): `Expand-Archive -Force "<zip>" ".claude\skills\buscar-material"`
 
