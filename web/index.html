@@ -150,12 +150,19 @@ body.con-sel #etq { bottom: 130px; }
 .eti button { width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; opacity: .6; }
 .eti button:hover { opacity: 1; background: var(--sobre-2); }
 .eti button svg { width: 7px; height: 7px; stroke-width: 2.4; }
+.eti.suelta { background: none; box-shadow: inset 0 0 0 1px var(--linea-fuerte); color: var(--texto-2); }
+.eti .mas svg { width: 8px; height: 8px; transform: rotate(45deg); }
+#etq h2 { display: flex; align-items: baseline; gap: 8px; }
+#etq h2 span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#etq h2 .enlace { font-weight: 400; white-space: nowrap; }
 #etq .sugeridas { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 #etq .sugeridas:empty { display: none; }
 #etq .sugeridas button { height: 24px; padding: 0 9px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--linea); color: var(--texto-2); font-size: 12.5px; }
+#etq .sugeridas button.lista { box-shadow: inset 0 0 0 1px var(--acento-suave); background: var(--acento-suave); color: var(--acento-texto); }
 #etq .sugeridas button:hover, #etq .sugeridas button.foco { background: var(--acento); color: #fff; box-shadow: none; }
 #etq .uso { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--linea); color: var(--texto-2); font-size: 12.5px; }
-#etq .uso .entrada { height: 26px; font-size: 12.5px; }
+#etq .uso { flex-wrap: wrap; }
+#etq .uso .entrada { height: 26px; font-size: 12.5px; flex: 1 1 150px; }
 #etq .uso span { white-space: nowrap; }
 .niveles { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 12px; align-items: center; color: var(--texto-3); }
 .niveles button { height: 26px; padding: 0 10px; border-radius: 13px; box-shadow: inset 0 0 0 1px var(--linea); color: var(--texto-2); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -192,6 +199,11 @@ body.inicio #pie { opacity: 0; pointer-events: none; }
 #conteo { font-variant-numeric: tabular-nums; white-space: nowrap; }
 #ruta-pie { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; color: var(--texto-2); }
 #ruta-pie b { color: var(--texto); font-weight: 500; margin-right: 8px; }
+#comp { flex: none; display: flex; align-items: center; gap: 6px; height: 22px; padding: 0 7px; margin: 0 -7px; border-radius: 6px; color: var(--texto-2); white-space: nowrap; }
+#comp:hover { background: var(--sobre); color: var(--texto); }
+#comp i { width: 6px; height: 6px; border-radius: 50%; background: #34c759; flex: none; }
+#comp.falta { color: var(--aviso); }
+#comp.falta i { background: var(--aviso); }
 #tam { display: flex; align-items: center; gap: 7px; }
 #tam svg { color: var(--texto-3); }
 #tam input { -webkit-appearance: none; appearance: none; width: 96px; height: 14px; background: none; margin: 0; }
@@ -250,6 +262,14 @@ body.inicio #pie { opacity: 0; pointer-events: none; }
 #hoja p { margin: 0 0 14px; color: var(--texto-2); line-height: 1.45; }
 #hoja .fila { display: flex; gap: 8px; }
 #hoja .pie-hoja { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+#hoja h3 { font-size: 12px; font-weight: 600; color: var(--texto-2); margin: 16px 0 7px; }
+#hoja h3 small { font-weight: 400; color: var(--texto-3); margin-left: 6px; font-size: 12px; }
+#hoja .grupo { display: flex; flex-wrap: wrap; gap: 5px; max-height: 132px; overflow-y: auto; }
+#hoja .grupo:empty::after { content: attr(data-vacio); color: var(--texto-3); }
+#hoja .fila.sumar { margin-top: 8px; }
+#hoja .quienes { margin: 0; color: var(--texto-2); font-size: 12px; line-height: 1.6; user-select: text; -webkit-user-select: text; }
+#hoja .quienes b { color: var(--texto); font-weight: 500; }
+#hoja p.falta { color: var(--aviso); }
 
 /* ---------- vista rápida ---------- */
 #vr { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(0,0,0,.28); animation: fundir .12s; }
@@ -283,7 +303,7 @@ body.con-sel #avisos { bottom: 132px; }
 @keyframes subir { from { opacity: 0; transform: translateY(8px); } }
 #soltar { position: fixed; inset: 10px; z-index: 70; border-radius: 16px; border: 2px dashed var(--acento); background: var(--acento-suave); backdrop-filter: blur(8px); display: grid; place-items: center; font-size: 17px; font-weight: 600; color: var(--acento-texto); pointer-events: none; }
 #caido { position: fixed; top: 0; left: 0; right: 0; z-index: 80; padding: 9px; text-align: center; background: var(--aviso-fondo); color: var(--aviso); backdrop-filter: blur(20px); font-size: 13px; }
-@media (max-width: 760px) { #campo { width: calc(100vw - 32px); margin-top: 34px; } body.inicio #campo { margin-top: 0; } #ruta-pie { display: none; } #pie { justify-content: space-between; } }
+@media (max-width: 760px) { #campo { width: calc(100vw - 32px); margin-top: 34px; } body.inicio #campo { margin-top: 0; } #ruta-pie { display: none; } #pie { justify-content: space-between; } #comp span { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -357,6 +377,7 @@ body.con-sel #avisos { bottom: 132px; }
 <div id="pie">
   <span id="conteo"></span>
   <span id="ruta-pie"></span>
+  <button id="comp" hidden><i></i><span></span></button>
   <label id="tam" title="Tamaño de las miniaturas"><svg class="ico" style="width:11px;height:11px"><use href="#i-chico"/></svg><input type="range" min="84" max="340" step="2" aria-label="Tamaño de las miniaturas"><svg class="ico" style="width:13px;height:13px"><use href="#i-grande"/></svg></label>
 </div>
 
@@ -407,6 +428,14 @@ function avisar(texto, ms = 2600) {
 
 // ---------- utilidades de formato ----------
 function fechaCorta(iso) { const p = String(iso).split('-'); return p.length === 3 ? `${+p[2]} ${MESES[+p[1] - 1]} ${p[0]}` : iso; }
+function hace(ms) { // "recién", "hace 12 min", "hoy 14:32", "12 nov 14:32"
+  const d = new Date(ms), seg = (Date.now() - ms) / 1000, hora = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  if (seg < 90) return 'recién';
+  if (seg < 3600) return 'hace ' + Math.round(seg / 60) + ' min';
+  return (d.toDateString() === new Date().toDateString() ? 'hoy ' : `${d.getDate()} ${MESES[d.getMonth()]} `) + hora;
+}
+function textoUso(us, conNota) { return 'usada ' + fechaCorta(us.f) + (us.por ? ' por ' + us.por : '') + (conNota && us.n ? ' (' + us.n + ')' : ''); }
+const enLista = t => est.etq.lista.includes(t);
 function peso(b) { return b > 1073741824 ? (b / 1073741824).toFixed(1).replace('.', ',') + ' GB' : b > 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
 function reloj(s) { s = Math.round(s); const m = Math.floor(s / 60); return (m >= 60 ? Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0'); }
 function plural(n, uno, muchos) { return nf.format(n) + ' ' + (n === 1 ? uno : muchos); }
@@ -584,7 +613,7 @@ function pintarPie() {
   const it = actual();
   const r = $('#ruta-pie');
   r.innerHTML = '';
-  if (it) { r.append(el('b', '', it.n), '   ' + lugar(it) + (it.et && it.et.length ? '  ·  ' + it.et.join(', ') : '') + (it.us ? '  ·  usada ' + fechaCorta(it.us.f) : '') + (conectado(it) ? '' : ' · disco desconectado')); r.title = rutaDe(it); }
+  if (it) { r.append(el('b', '', it.n), '   ' + lugar(it) + (it.et && it.et.length ? '  ·  ' + it.et.join(', ') : '') + (it.us ? '  ·  ' + textoUso(it.us) : '') + (conectado(it) ? '' : ' · disco desconectado')); r.title = rutaDe(it); }
   const s = $('#seleccion');
   s.classList.toggle('ver', E.sel.size > 0);
   document.body.classList.toggle('con-sel', E.sel.size > 0);
@@ -754,7 +783,14 @@ $('#f-fecha').onclick = e => {
   abrirMenu(0, 0, [['', 'Cualquier fecha'], null, ['7d', 'Últimos 7 días'], ['30d', 'Últimos 30 días'], ...(est.anios.length ? [null] : []), ...est.anios.slice(0, 8).map(a => ['a' + a, String(a)]), null].map(x => x && { t: x[1], tilde: E.f.fecha === x[0], f: () => fijar('fecha', x[0]) }).concat([{ titulo: 'Entre fechas' }, { nodo: r }]), e.currentTarget);
 };
 $('#f-uso').onclick = () => fijar('uso', E.f.uso === '' ? 'sin' : E.f.uso === 'sin' ? 'usada' : '');
-$('#f-etq').onclick = e => abrirMenu(0, 0, [{ t: 'Cualquier etiqueta', tilde: !E.f.etiquetas.length, f: () => fijar('etiquetas', []) }, null, ...est.etq.etiquetas.map(t => ({ t: t.nombre, k: nf.format(t.n), tilde: E.f.etiquetas.includes(t.nombre), f: () => fijar('etiquetas', E.f.etiquetas.includes(t.nombre) ? E.f.etiquetas.filter(x => x !== t.nombre) : [...E.f.etiquetas, t.nombre]) }))], e.currentTarget);
+$('#f-etq').onclick = e => {
+  const fila = t => ({ t: t.nombre, k: nf.format(t.n), tilde: E.f.etiquetas.includes(t.nombre), f: () => fijar('etiquetas', E.f.etiquetas.includes(t.nombre) ? E.f.etiquetas.filter(x => x !== t.nombre) : [...E.f.etiquetas, t.nombre]) });
+  const deLista = est.etq.etiquetas.filter(t => t.lista), sueltas = est.etq.etiquetas.filter(t => !t.lista);
+  const items = [{ t: 'Cualquier etiqueta', tilde: !E.f.etiquetas.length, f: () => fijar('etiquetas', []) }, null];
+  if (deLista.length && sueltas.length) items.push({ titulo: 'De la lista del equipo' }, ...deLista.map(fila), null, { titulo: 'Sueltas' }, ...sueltas.map(fila));
+  else items.push(...est.etq.etiquetas.map(fila));
+  abrirMenu(0, 0, items, e.currentTarget);
+};
 $('#f-orden').onclick = e => abrirMenu(0, 0, [...(hayConsulta() ? [{ t: 'Relevancia', tilde: E.orden === '', f: () => { E.orden = ''; buscar(); } }] : []), { t: 'Más nuevas', tilde: E.orden === 'fecha' || (!hayConsulta() && E.orden === ''), f: () => { E.orden = 'fecha'; buscar(); } }, { t: 'Más viejas', tilde: E.orden === 'fecha_asc', f: () => { E.orden = 'fecha_asc'; buscar(); } }], e.currentTarget);
 
 // ---------- campo de búsqueda ----------
@@ -818,7 +854,7 @@ function abrirVista() {
     });
   }
   const medio = vr.querySelector('#vr-medio');
-  const datosVR = () => [lugar(it), it.w ? `${it.w} × ${it.h}` : '', it.dur ? reloj(it.dur) : '', peso(it.s), ff.format(new Date(it.f)), it.et && it.et.length ? it.et.join(', ') : '', it.us ? 'usada ' + fechaCorta(it.us.f) + (it.us.n ? ' (' + it.us.n + ')' : '') : ''].filter(Boolean).join('  ·  ');
+  const datosVR = () => [lugar(it), it.w ? `${it.w} × ${it.h}` : '', it.dur ? reloj(it.dur) : '', peso(it.s), ff.format(new Date(it.f)), it.et && it.et.length ? it.et.join(', ') : '', it.us ? textoUso(it.us, true) : ''].filter(Boolean).join('  ·  ');
   if (vr._id === it.id + ':' + it.t) { vr.querySelector('#vr-datos').textContent = datosVR(); vr.querySelector('[data-a="sel"]').textContent = E.sel.has(it.id) ? 'Quitar de la selección' : 'Sumar a la selección'; return; }
   vr._id = it.id + ':' + it.t;
   vr.querySelector('#vr-nombre').textContent = it.n;
@@ -884,7 +920,7 @@ async function fijarUso(items, usada, nota) {
   try {
     await api('/api/usar', { ids: items.map(x => x.id), usada, nota });
     const d = new Date(), hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    for (const it of items) it.us = usada ? { f: (it.us && it.us.f) || hoy, ...(nota != null ? (nota ? { n: nota } : {}) : it.us && it.us.n ? { n: it.us.n } : {}) } : 0;
+    for (const it of items) it.us = usada ? { f: (it.us && it.us.f) || hoy, ...(nota != null ? (nota ? { n: nota } : {}) : it.us && it.us.n ? { n: it.us.n } : {}), por: (it.us && it.us.por) || est.etq.compartida.autor } : 0;
     await refrescar(); pintar(); pintarPie(); if (vr) abrirVista();
   } catch (e) { avisar(e.message); }
 }
@@ -903,11 +939,17 @@ function pintarEtq(enfocar) {
   if (!etq || !items.length) return cerrarEtq();
   const previo = etq.querySelector('.entrada.nueva'), texto = previo ? previo.value : '';
   etq.innerHTML = '';
-  etq.append(el('h2', '', items.length === 1 ? 'Etiquetas de ' + items[0].n : 'Etiquetas de ' + nf.format(items.length) + ' archivos'));
+  const titulo = el('h2'), verLista = el('button', 'enlace', 'Lista del equipo');
+  verLista.title = 'Las etiquetas acordadas por el equipo'; verLista.onclick = () => { cerrarEtq(); hojaEquipo(); };
+  titulo.append(el('span', '', items.length === 1 ? 'Etiquetas de ' + items[0].n : 'Etiquetas de ' + nf.format(items.length) + ' archivos'), verLista);
+  etq.append(titulo);
+  const hayLista = est.etq.lista.length > 0;
   const cuenta = new Map(); for (const it of items) for (const t of it.et || []) cuenta.set(t, (cuenta.get(t) || 0) + 1);
   const puestas = el('div', 'puestas');
   for (const [t, n] of [...cuenta].sort()) {
-    const c = el('span', 'eti' + (n < items.length ? ' parcial' : ''), t); if (n < items.length) c.title = `En ${n} de ${items.length}`;
+    const suelta = hayLista && !enLista(t);
+    const c = el('span', 'eti' + (n < items.length ? ' parcial' : '') + (suelta ? ' suelta' : ''), t);
+    c.title = [n < items.length ? `En ${n} de ${items.length}` : '', suelta ? 'Suelta: no está en la lista del equipo' : hayLista ? 'De la lista del equipo' : ''].filter(Boolean).join(' · ');
     const x = el('button'); x.innerHTML = ico('x'); x.title = 'Quitar'; x.onclick = () => cambiarEtiquetas(items, [], [t]).then(() => pintarEtq(true));
     c.append(x); puestas.append(c);
   }
@@ -916,8 +958,11 @@ function pintarEtq(enfocar) {
   let foco = -1;
   const sugerir = () => {
     const v = i.value.trim().toLowerCase(); sug.innerHTML = ''; foco = -1;
-    const lista = est.etq.etiquetas.filter(t => !(cuenta.get(t.nombre) === items.length) && (!v || t.nombre.includes(v))).sort((a, b) => (b.nombre.startsWith(v) - a.nombre.startsWith(v)) || b.n - a.n).slice(0, 8);
-    for (const t of lista) { const b = el('button', '', t.nombre); b.onclick = () => agregar(t.nombre); sug.append(b); }
+    // primero las de la lista acordada (aunque todavía no las tenga ninguna foto), después las sueltas que ya se usan
+    const enUso = new Map(est.etq.etiquetas.map(t => [t.nombre, t.n]));
+    const todas = [...est.etq.lista.map(nombre => ({ nombre, n: enUso.get(nombre) || 0, lista: true })), ...est.etq.etiquetas.filter(t => !t.lista)];
+    const lista = todas.filter(t => !(cuenta.get(t.nombre) === items.length) && (!v || t.nombre.includes(v))).sort((a, b) => (b.nombre.startsWith(v) - a.nombre.startsWith(v)) || (b.lista - a.lista) || b.n - a.n).slice(0, hayLista ? 12 : 8);
+    for (const t of lista) { const b = el('button', t.lista ? 'lista' : '', t.nombre); b.title = t.lista ? 'De la lista del equipo' : hayLista ? 'Suelta: no está en la lista del equipo' : ''; b.onclick = () => agregar(t.nombre); sug.append(b); }
   };
   const agregar = t => { t = t.trim().toLowerCase(); if (!t) return; i.value = ''; cambiarEtiquetas(items, t.split(',').map(x => x.trim()).filter(Boolean), []).then(() => pintarEtq(true)); };
   i.oninput = sugerir;
@@ -934,7 +979,9 @@ function pintarEtq(enfocar) {
     const n = el('input', 'entrada'); n.placeholder = 'Dónde se publicó (opcional)'; n.value = items.length === 1 ? items[0].us.n || '' : '';
     n.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') { fijarUso(items, true, n.value.trim()).then(() => { avisar('Nota guardada'); pintarEtq(); }); } if (e.key === 'Escape') cerrarEtq(); };
     const q = el('button', 'enlace', 'Quitar marca'); q.onclick = () => fijarUso(items, false).then(() => pintarEtq());
-    uso.append(el('span', '', items.length === 1 ? 'Usada el ' + fechaCorta(items[0].us.f) : 'Usadas'), n, q);
+    const cuando = el('span', '', items.length === 1 ? 'Usada el ' + fechaCorta(items[0].us.f) + (items[0].us.por ? ' por ' + items[0].us.por : '') : 'Usadas');
+    if (items.length > 1) cuando.title = [...new Set(items.map(x => x.us.por).filter(Boolean))].join(', ');
+    uso.append(cuando, n, q);
   } else {
     const b = el('button', 'boton', usadas ? `Marcar las ${items.length} como usadas` : 'Marcar como usada'); b.onclick = () => fijarUso(items, true).then(() => pintarEtq());
     uso.append(b, el('span', '', usadas ? `${usadas} de ${items.length} ya lo están` : 'Para saber qué material ya salió'));
@@ -942,6 +989,56 @@ function pintarEtq(enfocar) {
   etq.append(puestas, i, sug, uso);
   sugerir();
   if (enfocar) i.focus();
+}
+
+// ---------- etiquetas del equipo: lista acordada y estado de lo compartido ----------
+function pintarComp() {
+  const c = est.etq.compartida, b = $('#comp');
+  b.hidden = !c.activa;
+  if (!c.activa) return;
+  b.classList.toggle('falta', !!c.falta);
+  b.lastElementChild.textContent = c.falta ? 'No encuentro la carpeta compartida' : 'Etiquetas compartidas' + (c.novedad ? ' · novedades ' + hace(c.novedad) : '');
+  b.title = c.falta ? c.carpeta : `Las etiquetas, las marcas de usada y los clientes son de todo el equipo.\nCarpeta revisada ${hace(c.leido)}` + (c.novedad ? ` · último cambio de otra compu: ${hace(c.novedad)}` : ' · todavía no llegó nada de otra compu') + `\nFirmás como ${c.autor}`;
+}
+$('#comp').onclick = () => hojaEquipo();
+function hojaEquipo() {
+  if ($('#velo')) return;
+  const velo = el('div'); velo.id = 'velo';
+  velo.innerHTML = `<div id="hoja" role="dialog" aria-label="Etiquetas del equipo"><h2>Etiquetas del equipo</h2><p class="donde"></p><h3>Lista acordada<small>las que se sugieren primero al etiquetar</small></h3><div class="grupo acordadas" data-vacio="Todavía no hay ninguna."></div><div class="fila sumar"><input class="entrada" spellcheck="false" placeholder="Sumar a la lista y Enter"></div><h3 class="t-sueltas">Sueltas<small>en uso, fuera de la lista</small></h3><div class="grupo sueltas"></div><h3 class="t-quienes">Quiénes</h3><p class="quienes"></p><div class="pie-hoja"><button class="boton primario" data-a="no">Listo</button></div></div>`;
+  const i = velo.querySelector('input');
+  const cambiar = async cuerpo => { try { await api('/api/lista', cuerpo); await refrescar(); pintarHoja(); if (etq) pintarEtq(); } catch (e) { avisar(e.message); } };
+  const pintarHoja = () => {
+    const c = est.etq.compartida, donde = velo.querySelector('.donde');
+    donde.className = 'donde' + (c.falta ? ' falta' : '');
+    donde.textContent = c.falta ? 'No encuentro la carpeta compartida. Si se mudó, pedile a la Mente que la vuelva a indicar.' : c.activa ? `Compartidas con el equipo. Lo que etiquetás o marcás como usado les llega cuando compartís la Mente, y lo de ellos te llega solo. Firmás como ${c.autor}.` : 'Por ahora están solo en esta compu. Para compartirlas con el equipo, pedile a la Mente: "compartí las etiquetas del buscador".';
+    donde.title = c.activa ? c.carpeta : '';
+    const enUso = new Map(est.etq.etiquetas.map(t => [t.nombre, t.n]));
+    const ac = velo.querySelector('.acordadas'); ac.innerHTML = '';
+    for (const t of est.etq.lista) {
+      const ch = el('span', 'eti', t); ch.title = plural(enUso.get(t) || 0, 'archivo la tiene', 'archivos la tienen');
+      const x = el('button'); x.innerHTML = ico('x'); x.title = 'Sacar de la lista (las fotos que la tienen la conservan)'; x.onclick = () => cambiar({ quitar: [t] });
+      ch.append(x); ac.append(ch);
+    }
+    const sueltas = est.etq.etiquetas.filter(t => !t.lista), su = velo.querySelector('.sueltas'); su.innerHTML = '';
+    velo.querySelector('.t-sueltas').hidden = su.hidden = !sueltas.length;
+    for (const t of sueltas) {
+      const ch = el('span', 'eti suelta', t.nombre); ch.title = plural(t.n, 'archivo la tiene', 'archivos la tienen');
+      const m = el('button', 'mas'); m.innerHTML = ico('x'); m.title = 'Sumar a la lista'; m.onclick = () => cambiar({ agregar: [t.nombre] });
+      ch.append(m); su.append(ch);
+    }
+    const qs = velo.querySelector('.quienes'); qs.innerHTML = '';
+    velo.querySelector('.t-quienes').hidden = qs.hidden = !c.activa || !c.personas.length;
+    c.personas.forEach((p, k) => { if (k) qs.append(el('br')); qs.append(el('b', '', p.nombre), ` · ${plural(p.eventos, 'cambio', 'cambios')} · último ${hace(p.ultimo)}`); });
+  };
+  const cerrar = () => velo.remove();
+  velo.addEventListener('mousedown', e => { if (e.target === velo) cerrar(); });
+  velo.addEventListener('keydown', e => {
+    e.stopPropagation();
+    if (e.key === 'Escape') cerrar();
+    if (e.key === 'Enter' && e.target === i && i.value.trim()) { const nuevas = i.value.split(',').map(x => x.trim()).filter(Boolean); i.value = ''; cambiar({ agregar: nuevas }); }
+  });
+  velo.querySelector('[data-a="no"]').onclick = cerrar;
+  document.body.append(velo); pintarHoja(); i.focus();
 }
 
 // ---------- cliente por carpeta ----------
@@ -1199,6 +1296,7 @@ function pintarInicio() {
     const partes = [plural(est.fotos, 'foto', 'fotos')]; if (est.videos) partes.push(plural(est.videos, 'video', 'videos'));
     const v = el('button', 'enlace', 'Ver todo'); v.onclick = () => { E.verTodo = true; buscar(); grilla.focus(); };
     r.append(partes.join(' y ') + ' en ' + plural(est.bibliotecas.length, 'biblioteca', 'bibliotecas'), el('span', '', '·'), v);
+    if (est.etq.compartida.activa) { const c = el('button', 'enlace', est.etq.compartida.falta ? 'No encuentro las etiquetas compartidas' : 'Etiquetas compartidas'); c.onclick = () => hojaEquipo(); r.append(el('span', '', '·'), c); }
   } else if (est.bibliotecas.length) r.append(est.indexado.activo ? 'Indexando por primera vez. En un rato ya se puede buscar.' : 'Las bibliotecas no tienen fotos ni videos todavía.');
 }
 let ultimaVersion = 0, ultimoPulso = 0, firmaInicio = '';
@@ -1213,7 +1311,8 @@ async function refrescar() {
     ind.querySelector('.avance').style.strokeDashoffset = 37.7 * (1 - (x.total ? x.hechas / x.total : .03));
     ind.lastElementChild.textContent = x.fase === 'revisando' ? 'Revisando…' : x.fase === 'completando' ? 'Completando…' : textoIndexado(false);
   }
-  const fi = JSON.stringify([est.ejemplos, est.fotos, est.videos, est.bibliotecas.length, x.activo]);
+  pintarComp();
+  const fi = JSON.stringify([est.ejemplos, est.fotos, est.videos, est.bibliotecas.length, x.activo, est.etq.compartida.activa, est.etq.compartida.falta]);
   if (fi !== firmaInicio) { firmaInicio = fi; pintarInicio(); }
   pintarChips(); pintarPanel();
   if (cambioLibs) { pintar(); pintarPie(); }
