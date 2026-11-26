@@ -1,0 +1,16 @@
+{
+  "name": "buscar-material-entorno",
+  "private": true,
+  "version": "3.0.0",
+  "description": "Dependencias del buscador de material. Se instalan en ~/.mente-ai/buscar-material, no dentro de la skill. onnxruntime-web (91 MB) no se usa fuera del navegador: se reemplaza por un paquete mínimo.",
+  "dependencies": {
+    "@huggingface/transformers": "3.8.1",
+    "sharp": "0.34.5",
+    "heic-decode": "2.1.0",
+    "exiftool-vendored": "35.21.0",
+    "ag-psd": "30.2.0"
+  },
+  "overrides": {
+    "onnxruntime-web": "npm:onnxruntime-common@1.21.0"
+  }
+}

@@ -1,0 +1,36 @@
+name: pruebas
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  flujo:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-15-intel, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - name: Flujo completo con el lanzador real
+        run: node pruebas/ci.mjs
+      - name: Capturas de la interfaz
+        if: always()
+        working-directory: pruebas
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.49.1
+          npx playwright install chromium
+          node capturas.mjs
+      - name: Cerrar el buscador
+        if: always()
+        run: node buscar.cjs cerrar
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resultados-${{ matrix.os }}
+          path: pruebas/salida
